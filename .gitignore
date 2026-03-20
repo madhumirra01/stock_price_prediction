@@ -1,4 +1,5 @@
 node_modules/
+stock-frontend/node_modules/
 .venv/
 venv/
 __pycache__/
