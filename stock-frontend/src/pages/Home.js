@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
@@ -54,9 +54,7 @@ function MiniChart({ up }) {
           <stop offset="100%" stopColor={up ? '#00ff88' : '#ff3355'} stopOpacity="0" />
         </linearGradient>
       </defs>
-
       <path d={fill} fill={`url(#grad-${up})`} />
-
       <polyline
         points={points}
         fill="none"
@@ -69,46 +67,8 @@ function MiniChart({ up }) {
 }
 
 function Home() {
-  const tickerRef = useRef(null);
-
-  useEffect(() => {
-    const ticker = tickerRef.current;
-    if (!ticker) return;
-
-    let pos = 0;
-    const speed = 0.5;
-    const total = ticker.scrollWidth / 2;
-
-    const animate = () => {
-      pos += speed;
-
-      if (pos >= total) pos = 0;
-
-      ticker.style.transform = `translateX(-${pos}px)`;
-
-      requestAnimationFrame(animate);
-    };
-
-    const frame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
   return (
     <div className="home-page">
-
-      {/* Ticker Strip */}
-      <div className="ticker-strip">
-        <div className="ticker-track" ref={tickerRef}>
-          {[...TICKERS, ...TICKERS].map((t, i) => (
-            <span key={i} className={`ticker-item ${t.up ? 'up' : 'down'}`}>
-              <strong>{t.sym}</strong>
-              <span>{t.price}</span>
-              <span className="change">{t.change}</span>
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* Hero */}
       <section className="hero">
@@ -133,7 +93,6 @@ function Home() {
           <Link to="/analysis" className="btn-primary">
             Start Analysis →
           </Link>
-
           <Link to="/prediction" className="btn-secondary">
             View Predictions
           </Link>
@@ -149,24 +108,17 @@ function Home() {
         <div className="stocks-grid">
           {TICKERS.map((t, i) => (
             <div key={i} className={`stock-card ${t.up ? 'up' : 'down'}`}>
-
               <div className="stock-top">
                 <div>
                   <div className="stock-sym">{t.sym}</div>
                   <div className="stock-full">Dataset Sample</div>
                 </div>
-
                 <span className={`change-badge ${t.up ? 'up' : 'down'}`}>
                   {t.change}
                 </span>
               </div>
-
               <MiniChart up={t.up} />
-
-              <div className="stock-price">
-                ${t.price}
-              </div>
-
+              <div className="stock-price">${t.price}</div>
             </div>
           ))}
         </div>
@@ -174,41 +126,17 @@ function Home() {
 
       {/* Features */}
       <section className="features-section">
-
-        <h2 className="section-title fade-up">
-          Core Features
-        </h2>
-
+        <h2 className="section-title fade-up">Core Features</h2>
         <div className="features-grid">
-
           {FEATURES.map((f, i) => (
-            <Link
-              key={i}
-              to={f.link}
-              className={`feature-card color-${f.color}`}
-            >
-
-              <div className="feature-icon">
-                {f.icon}
-              </div>
-
-              <h3 className="feature-title">
-                {f.title}
-              </h3>
-
-              <p className="feature-desc">
-                {f.desc}
-              </p>
-
-              <span className="feature-link">
-                Explore →
-              </span>
-
+            <Link key={i} to={f.link} className={`feature-card color-${f.color}`}>
+              <div className="feature-icon">{f.icon}</div>
+              <h3 className="feature-title">{f.title}</h3>
+              <p className="feature-desc">{f.desc}</p>
+              <span className="feature-link">Explore →</span>
             </Link>
           ))}
-
         </div>
-
       </section>
 
     </div>

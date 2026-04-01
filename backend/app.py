@@ -50,11 +50,19 @@ def run_query():
 
 @app.route("/predict", methods=["GET"])
 def predict():
+    ticker = request.args.get("ticker", "AAPL").upper()
+
     db = get_db()
     cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT date, open, high, low, close, volume FROM stocks ORDER BY date")
+    cursor.execute(
+        "SELECT date, open, high, low, close, volume FROM stocks WHERE ticker = %s ORDER BY date",
+        (ticker,)
+    )
     data = cursor.fetchall()
     db.close()
+
+    if not data:
+        return jsonify({"error": f"No data found for ticker {ticker}"}), 404
 
     df = pd.DataFrame(data)
     df["date"] = pd.to_datetime(df["date"])
@@ -70,10 +78,18 @@ def predict():
     model.fit(X_train, y_train)
     predictions = model.predict(X_test)
 
+    score = model.score(X_test, y_test)
+
+    # compute simple MAE
+    mae = float((abs(y_test.values - predictions)).mean())
+
     return jsonify({
+        "ticker": ticker,
         "dates": test_dates.dt.strftime("%Y-%m-%d").tolist(),
-        "actual": y_test.tolist(),
-        "predicted": predictions.tolist(),
+        "actual": [round(v, 4) for v in y_test.tolist()],
+        "predicted": [round(v, 4) for v in predictions.tolist()],
+        "r2_score": round(score, 4),
+        "mae": round(mae, 4),
         "info": {
             "train_start": str(train_dates.iloc[0].date()),
             "train_end": str(train_dates.iloc[-1].date()),
@@ -81,7 +97,6 @@ def predict():
             "test_end": str(test_dates.iloc[-1].date())
         }
     })
-
 
 if __name__ == "__main__":
     app.run(debug=True)
